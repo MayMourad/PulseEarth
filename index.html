@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseEarth - AI-Powered Global Environmental Health Monitoring</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .hero {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+        .section-title {
+            font-family: 'Roboto', sans-serif;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .section-title:after {
+            content: "";
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: #2D9D78;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .eco-green {
+            color: #2D9D78;
+        }
+        .eco-blue {
+            color: #3A86FF;
+        }
+        .bg-eco-green {
+            background-color: #2D9D78;
+        }
+        .bg-eco-blue {
+            background-color: #3A86FF;
+        }
+        .bg-eco-brown {
+            background-color: #8D6E63;
+        }
+        #map { 
+            height: 500px; 
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        .app-button {
+            transition: all 0.3s ease;
+        }
+        .app-button:hover {
+            transform: scale(1.05);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover {
+            color: #000;
+        }
+        .partner-img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <span class="text-2xl font-bold eco-green">Pulse</span><span class="text-2xl font-bold eco-blue">Earth</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="text-gray-700 hover:text-green-600 font-medium">Home</a>
+                <a href="#how-it-works" class="text-gray-700 hover:text-green-600 font-medium">How It Works</a>
+                <a href="#map-section" class="text-gray-700 hover:text-green-600 font-medium">Environmental Map</a>
+                <a href="#impact" class="text-gray-700 hover:text-green-600 font-medium">Impact</a>
+                <a href="#get-involved" class="text-gray-700 hover:text-green-600 font-medium">Get Involved</a>
+            </div>
+            <div class="md:hidden flex items-center">
+                <button class="outline-none mobile-menu-button">
+                    <svg class=" w-6 h-6 text-gray-500 hover:text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="hidden mobile-menu md:hidden">
+            <ul class="px-4 py-3 space-y-3">
+                <li><a href="#home" class="block text-gray-700 hover:text-green-600 font-medium">Home</a></li>
+                <li><a href="#how-it-works" class="block text-gray-700 hover:text-green-600 font-medium">How It Works</a></li>
+                <li><a href="#map-section" class="block text-gray-700 hover:text-green-600 font-medium">Environmental Map</a></li>
+                <li><a href="#impact" class="block text-gray-700 hover:text-green-600 font-medium">Impact</a></li>
+                <li><a href="#get-involved" class="block text-gray-700 hover:text-green-600 font-medium">Get Involved</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero flex items-center justify-center">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">AI-Powered Global Environmental Health Monitoring</h1>
+            <p class="text-xl md:text-2xl text-white mb-8">Empowering citizens to contribute to global environmental solutions through data and AI.</p>
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                <a href="#get-involved" class="bg-eco-green text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out">Join the Movement</a>
+                <a href="#how-it-works" class="bg-transparent border-2 border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-white hover:text-green-700 transition duration-300 ease-in-out">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center section-title mb-16">How PulseEarth Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="feature-card bg-white p-8 rounded-lg shadow-lg text-center">
+                    <div class="bg-eco-green inline-block p-4 rounded-full mb-6">
+                        <i class="fas fa-mobile-alt text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Citizen Data Collection</h3>
+                    <p class="text-gray-600">Users contribute environmental data through the PulseEarth mobile app, capturing local conditions and observations.</p>
+                </div>
+                <div class="feature-card bg-white p-8 rounded-lg shadow-lg text-center">
+                    <div class="bg-eco-blue inline-block p-4 rounded-full mb-6">
+                        <i class="fas fa-brain text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">AI-Powered Analysis</h3>
+                    <p class="text-gray-600">Our advanced AI algorithms process and analyze the collected data to identify patterns, trends, and environmental concerns.</p>
+                </div>
+                <div class="feature-card bg-white p-8 rounded-lg shadow-lg text-center">
+                    <div class="bg-eco-brown inline-block p-4 rounded-full mb-6">
+                        <i class="fas fa-globe-americas text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Global Impact</h3>
+                    <p class="text-gray-600">The analyzed data informs environmental action plans, policy recommendations, and community-driven initiatives.</p>
+                </div>
+            </div>
+            <div class="mt-16 text-center">
+                <img src="https://images.unsplash.com/photo-1590217079425-2246ad59a159?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" alt="PulseEarth Data Flow" class="mx-auto rounded-lg shadow-lg">
+                <p class="mt-4 text-gray-500 italic">PulseEarth's AI-driven data processing workflow</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section id="map-section" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center section-title mb-16">Interactive Environmental Map</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div class="lg:col-span-2">
+                    <div id="map"></div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-bold mb-4">Environmental Insights</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Air Quality Index</h4>
+                            <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="air-quality-bar" class="h-full bg-green-500" style="width: 75%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm">
+                                <span>Poor</span>
+                                <span>Excellent</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Biodiversity Health</h4>
+                            <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="biodiversity-bar" class="h-full bg-yellow-500" style="width: 60%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm">
+                                <span>Critical</span>
+                                <span>Thriving</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg mb-2">Water Quality</h4>
+                            <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="water-quality-bar" class="h-full bg-blue-500" style="width: 80%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm">
+                                <span>Polluted</span>
+                                <span>Clean</span>
+                            </div>
+                        </div>
+                        <div class="mt-8">
+                            <h4 class="font-bold text-lg mb-2">AI Predictions</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-arrow-trend-up text-green-600 mr-2"></i>
+                                    <p>10% projected improvement in air quality over next 3 months</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-arrow-trend-down text-red-600 mr-2"></i>
+                                    <p>Potential drought conditions in southwestern regions</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                                    <p>Invasive species alert in northeastern wetlands</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-600">
+                <p>Zoom in to your location to see detailed environmental data for your area</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Tracker Section -->
+    <section id="impact" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center section-title mb-16">Impact Tracker</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-6">Carbon Emission Reduction</h3>
+                    <div class="chart-container">
+                        <canvas id="carbonChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-6">Air Quality Improvement</h3>
+                    <div class="chart-container">
+                        <canvas id="airQualityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <div class="text-4xl font-bold text-green-600 mb-2">5,732</div>
+                    <div class="text-xl">Citizen Contributors</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <div class="text-4xl font-bold text-blue-600 mb-2">243</div>
+                    <div class="text-xl">Communities Impacted</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <div class="text-4xl font-bold text-yellow-600 mb-2">82%</div>
+                    <div class="text-xl">Data Accuracy Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Get Involved Section -->
+    <section id="get-involved" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center section-title mb-16">Get Involved</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">Download the PulseEarth App</h3>
+                    <p class="text-gray-600 mb-6">Join thousands of citizen scientists making a difference. Start collecting data and contribute to global environmental health monitoring today.</p>
+                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                        <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" class="app-button flex items-center justify-center bg-black text-white px-6 py-3 rounded-lg">
+                            <i class="fab fa-apple text-2xl mr-2"></i>
+                            <div>
+                                <div class="text-xs">Download on the</div>
+                                <div class="text-lg font-semibold">App Store</div>
+                            </div>
+                        </a>
+                        <a href="https://play.google.com" target="_blank" rel="noopener noreferrer" class="app-button flex items-center justify-center bg-black text-white px-6 py-3 rounded-lg">
+                            <i class="fab fa-google-play text-2xl mr-2"></i>
+                            <div>
+                                <div class="text-xs">Get it on</div>
+                                <div class="text-lg font-semibold">Google Play</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="mt-8">
+                        <h4 class="font-bold text-lg mb-2">Other Ways to Help</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li>Share PulseEarth on social media</li>
+                            <li>Organize a local data collection event</li>
+                            <li>Support our partner environmental organizations</li>
+                            <li>Subscribe to our newsletter for updates</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="flex justify-center">
+                    <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="PulseEarth App" class="max-h-96 rounded-lg shadow-xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <span class="text-2xl font-bold text-green-400">Pulse</span><span class="text-2xl font-bold text-blue-400">Earth</span>
+                    </div>
+                    <p class="text-gray-300">AI-Powered Environmental Health Monitoring System for a better planet.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-300 hover:text-white">Home</a></li>
+                        <li><a href="#how-it-works" class="text-gray-300 hover:text-white">How It Works</a></li>
+                        <li><a href="#map-section" class="text-gray-300 hover:text-white">Environmental Map</a></li>
+                        <li><a href="#impact" class="text-gray-300 hover:text-white">Impact</a></li>
+                        <li><a href="#get-involved" class="text-gray-300 hover:text-white">Get Involved</a></li>
+                        <li><a href="privacy.html" target="_blank" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
+                        <li><a href="cookie.html" target="_blank" class="text-gray-300 hover:text-white">Cookie Policy</a></li>
+                        <li><a href="terms.html" target="_blank" class="text-gray-300 hover:text-white">Terms of Service</a></li>
+                        <li><a href="contact.html" target="_blank" class="text-gray-300 hover:text-white">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold mb-2">Subscribe to our newsletter</h4>
+                        <div class="flex">
+                            <input type="email" placeholder="Your email" class="px-4 py-2 w-full rounded-l-lg focus:outline-none text-gray-900">
+                            <button class="bg-eco-green px-4 py-2 rounded-r-lg hover:bg-green-700 transition duration-300">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Partners</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="https://www.worldwildlife.org/" target="_blank" rel="noopener noreferrer">
+                            <img src="https://images.unsplash.com/photo-1559126807-66c675776bd1?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="WWF" class="partner-img">
+                        </a>
+                        <a href="https://www.greenpeace.org/" target="_blank" rel="noopener noreferrer">
+                            <img src="https://images.unsplash.com/photo-1564121211835-e88c852648ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Greenpeace" class="partner-img">
+                        </a>
+                        <a href="https://www.unep.org/" target="_blank" rel="noopener noreferrer">
+                            <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="UN Environment" class="partner-img">
+                        </a>
+                        <a href="https://www.conservation.org/" target="_blank" rel="noopener noreferrer">
+                            <img src="https://images.unsplash.com/photo-1464639351491-a172c2aa2911?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Conservation International" class="partner-img">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 text-sm">© 2025 PulseEarth. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Map Initialization -->
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([37.7749, -122.4194], 10); // Example coordinates for San Francisco
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Add a marker
+        L.marker([37.7749, -122.4194]).addTo(map)
+            .bindPopup('San Francisco')
+            .openPopup();
+    </script>
+</body>
+</html>
